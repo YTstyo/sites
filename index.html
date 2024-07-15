@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Converter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <h1>Price Converter</h1>
+        <form id="urlForm">
+            <input type="text" id="urlInput" placeholder="Enter URL">
+            <button type="submit">Convert</button>
+        </form>
+        <div id="loading" style="display: none;">
+            <p>Loading...</p>
+        </div>
+        <div id="result" style="display: none;">
+            <p id="cnyPrice"></p>
+            <p id="usdPrice"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('urlForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+
+                var urlInput = document.getElementById('urlInput').value.trim();
+
+                var apiUrl = 'https://e2bb5c8c1170bbf0c837721a8969e0fa.serveo.net/convert';
+                var params = { url: urlInput };
+
+                fetch(apiUrl + '?' + new URLSearchParams(params))
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.weidian_price_cny !== undefined) {
+                            document.getElementById('cnyPrice').textContent = `Price in CNY: ${data.weidian_price_cny} CNY`;
+                            document.getElementById('usdPrice').textContent = `Price in USD: ${data.weidian_price_usd.toFixed(2)} USD`;
+                        } else if (data.taobao_price_cny !== undefined) {
+                            document.getElementById('cnyPrice').textContent = `Price in CNY: ${data.taobao_price_cny} CNY`;
+                            document.getElementById('usdPrice').textContent = `Price in USD: ${data.taobao_price_usd.toFixed(2)} USD`;
+                        }
+
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('result').style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loading').style.display = 'none';
+                        alert('Error fetching data. Please try again.');
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
